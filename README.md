@@ -5,7 +5,7 @@ it to implement behavior of your Arduino based robot, chat-bot or whatever else 
 
 ## Key features
 
-* Noddz provides implementations of typical behavior trees components (like selector and sequence nodes) and base classes 
+* Nodzz provides implementations of typical behavior trees components (like selector and sequence nodes) and base classes 
   for creating your own;
 * Behavior trees can be assembled and configured from components by using Python API or
   [pydantic](https://pydantic-docs.helpmanual.io/) and JSON friendly configs;
@@ -28,9 +28,7 @@ it to implement behavior of your Arduino based robot, chat-bot or whatever else 
 ### Installation
 
 ```
-git clone https://github.com/duskforge/nodzz.git
-cd nodzz
-pip install -e .
+pip install nodzz
 ```
 
 ### Theory 

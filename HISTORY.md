@@ -1,6 +1,11 @@
-## v0.1.0
+## v0.1.1 (2021-07-19)
+* **Fixed** package discovery in `setup.cfg`.
+* **Fixed** naming typos in docs.
+* **Fixed** installation snippet in readme.
 
-Noddz first release
+## v0.1.0 (2021-07-16)
+
+Nodzz first release
 
 * **Added** component entity (`ComponentBase`).
 * **Added** base `pdantic` model for component configs (`ConfigModelBase`). 
