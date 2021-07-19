@@ -120,7 +120,7 @@ class NodeWrapper(NodeBase):
         state_str = str(state.to_dict())
         config_dict = dict(self.config)
         name = config_dict.get('name')
-        debug_str = f'[noddz debug] id: {self.id}, name: {name}, status: {str(status)}, state: {state_str}'
+        debug_str = f'[nodzz debug] id: {self.id}, name: {name}, status: {str(status)}, state: {state_str}'
         print(debug_str)
         return status
 
