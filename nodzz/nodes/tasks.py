@@ -21,7 +21,7 @@ class EvalSettingsBase(BaseModel):
     Attributes:
         eval_type: Str evaluation type identifier, its constant default value must be
             set in subclasses.
-        invert: Boolean inversion flag. If True, 'Not' operator is applied to the
+        invert: Boolean inversion flag. If ``True``, ``not`` operator is applied to the
             evaluation result
     """
     eval_type: str
@@ -32,14 +32,14 @@ class EvalSettingsBase(BaseModel):
         """Validates evaluation type name.
 
         Method is used for validation during config initialisation from
-        JSON-like dicts by 'parse_obj' method. Ensures proper evaluation
+        JSON-like dicts by ``parse_obj`` method. Ensures proper evaluation
         settings initialisation.
 
         Args:
-            v: Str 'eval_type' field value.
+            v: Str ``eval_type`` field value.
 
         Returns:
-            Unchanged str 'eval_type' field value.
+            Unchanged str ``eval_type`` field value.
         """
         eval_type = cls.__fields__['eval_type'].default
 
@@ -68,8 +68,8 @@ class More(EvalSettingsBase):
 
     Attributes:
         value: Value to be compared with variable value.
-        strict: Boolean comparison type. If True - strict comparison will be
-            applied, if False - not strict.
+        strict: Boolean comparison type. If ``True`` - strict comparison will be
+            applied, if ``False`` - not strict.
     """
     eval_type: str = Field(default='more', const=True)
     value: Union[int, float]
@@ -83,8 +83,8 @@ class Less(EvalSettingsBase):
 
     Attributes:
         value: Value to be compared with variable value.
-        strict: Boolean comparison type. If True - strict comparison will be
-            applied, if False - not strict.
+        strict: Boolean comparison type. If ``True`` - strict comparison will be
+            applied, if ``False`` - not strict.
     """
     eval_type: str = Field(default='less', const=True)
     value: Union[int, float]
@@ -109,23 +109,23 @@ _Evaluation = Union[_SingleEvaluation, List[_SingleEvaluation]]
 
 
 class EvaluationNodeConfig(ConfigModelBase):
-    """Base model for the 'EvaluationNode' settings.
+    """Base model for the ``EvaluationNode`` settings.
 
-    Every 'EvaluationNode' config should be derived from this class. Each
-    variable value evaluation is configured by an item of the 'conditions'
+    Every ``EvaluationNode`` config should be derived from this class. Each
+    variable value evaluation is configured by an item of the ``conditions``
     field dict, where string key is equal to the evaluated variable name
     and value has two possible type options:
-    1. One of 'EvalSettingsBase' subclasses (but not the 'EvalSettingsBase'
+    1. One of ``EvalSettingsBase`` subclasses (but not the ``EvalSettingsBase``
         itself). In this case only one variable evaluation will be performed
         according to the evaluation type and values it was initialised with.
-    2. List of 'EvalSettingsBase' subclasses. In this case each defined
+    2. List of ``EvalSettingsBase`` subclasses. In this case each defined
         evaluation will be performed for the variable.
 
     Attributes:
         conditions: Dict with evaluation conditions.
-        eval_none: Bool uninitialised values evaluation flag. If True
+        eval_none: Bool uninitialised values evaluation flag. If ``True``
             uninitialised variables (which are equal to variables with
-            None values) will be estimated. If False, node will return
+            ``None`` values) will be estimated. If ``False``, node will return
             RUNNING status until all variables will be initialised or
             at least one evaluation fails.
     """
@@ -140,16 +140,17 @@ class EvaluationNode(NodeBase):
     """Node that evaluates state variables values.
 
     This node implements one of the most common tasks: check if some state
-    variables values meet certain conditions. 'EvaluationNode' allows to
+    variables values meet certain conditions. ``EvaluationNode`` allows to
     parametrise all variables values evaluations in node config, so its
-    enough to create new config by deriving from 'EvaluationNodeConfig'
-    and initialise node with it. Also 'EvaluationNode' can be configured
-    by 'JSONDict' config. In this case no special config model should be
-    created, but config should match 'EvaluationNodeConfig' config model.
+    enough to create new config by deriving from ``EvaluationNodeConfig``
+    and initialise node with it. Also ``EvaluationNode`` can be configured
+    by ``JSONDict`` config. In this case no special config model should be
+    created, but config should match ``EvaluationNodeConfig`` config model.
 
     Four most common evaluation operation are implemented, see methods
-    with 'eval_' prefix.
+    with ``eval_`` prefix.
     """
+    asyncable: bool = True
     config_model = EvaluationNodeConfig
     config: TEvaluationNodeConfig
 
@@ -182,9 +183,9 @@ class EvaluationNode(NodeBase):
         Returns SUCCESS status if all evaluations were successfully passed for all
         variables. Otherwise it returns:
         - FAILED status if at least one of the evaluations failed or at least one
-            variable was not initialised and 'eval_none' config flag is True;
-        - RUNNING status if 'eval_none' config flag is False, at least one variable
-            being estimated is not initialised and none evaluations failed.
+            variable was not initialised and ``eval_none`` config flag is ``True``;
+        - RUNNING status if ``eval_none`` config flag is ``False``, at least one variable
+            being estimated is not initialised and ``None`` evaluations failed.
 
         Args:
             state: Behavior tree execution state.
@@ -217,7 +218,7 @@ class EvaluationNode(NodeBase):
             var: Value of the variable being evaluated.
             value: Value to compare.
         Returns:
-            True if variable value is equal to the given value, else False.
+            ``True`` if variable value is equal to the given value, else ``False``.
         """
         return var == value
 
@@ -228,9 +229,9 @@ class EvaluationNode(NodeBase):
         Args:
             var: Value of the variable being evaluated.
             value: Value to compare.
-            strict: Strict comparison flag, if true - strict comparison is performed.
+            strict: Strict comparison flag, if ``True`` - strict comparison is performed.
         Returns:
-            True if variable value is more than the given value, else False.
+            ``True`` if variable value is more than the given value, else ``False``.
         """
         return var > value if strict else var >= value
 
@@ -241,9 +242,9 @@ class EvaluationNode(NodeBase):
         Args:
             var: Value of the variable being evaluated.
             value: Value to compare.
-            strict: Strict comparison flag, if true - strict comparison is performed.
+            strict: Strict comparison flag, if ``True`` - strict comparison is performed.
         Returns:
-            True if variable value is less than the given value, else False.
+            ``True`` if variable value is less than the given value, else ``False``.
         """
         return var < value if strict else var <= value
 
@@ -258,18 +259,18 @@ class EvaluationNode(NodeBase):
             var: List variable value.
             value: List to search common elements with.
         Returns:
-            True if list from variable value has at least one element in common
-            with the given list, else False.
+            ``True`` if list from variable value has at least one element in common
+            with the given list, else ``False``.
         """
         return bool(set(var).intersection(set(value)))
 
 
 class EvalNoneNodeConfig(ConfigModelBase):
-    """Base model for the 'EvalNoneNode' settings.
+    """Base model for the ``EvalNoneNode`` settings.
 
     Attributes:
         variables: List of str names of the variables to be evaluated to be initialised.
-        invert: Boolean inversion flag. If True, 'Not' operator is applied to the
+        invert: Boolean inversion flag. If ``True``, ``not`` operator is applied to the
             each variable evaluation result
     """
     variables: List[str] = Field(min_items=1)
@@ -281,9 +282,10 @@ class EvalNoneNode(NodeBase):
 
     This node implements one of the most common tasks: check if some
     state variables values initialised. Please note that there is an
-    important project-wide convention: None state variable value always
-    represents uninitialised variable.
+    important project-wide convention: ``None`` state variable value
+    always represents uninitialised variable.
     """
+    asyncable: bool = True
     config_model = EvalNoneNodeConfig
     config: EvalNoneNodeConfig
 
@@ -293,11 +295,11 @@ class EvalNoneNode(NodeBase):
     def execute(self, state: State) -> NodeStatus:
         """Evaluates if state variables initialised.
 
-        If 'invert' config flag is False returns FAILED status if at least one of the
-        evaluated variables is uninitialised or is None. Otherwise returns SUCCESS status.
+        If ``invert`` config flag is ``False`` returns FAILED status if at least one of the
+        evaluated variables is uninitialised or is ``None``. Otherwise returns SUCCESS status.
 
-        If 'invert' config flag is True returns FAILED status if at least one of the
-        evaluated variables is initialised and not None. Otherwise returns SUCCESS status.
+        If ``invert`` config flag is ``True`` returns FAILED status if at least one of the
+        evaluated variables is initialised and not ``None``. Otherwise returns SUCCESS status.
 
         Args:
             state: Behavior tree execution state.
@@ -318,10 +320,10 @@ class EvalNoneNode(NodeBase):
 
 
 class AssignNodeConfig(ConfigModelBase):
-    """Base model for the 'SetNode' settings.
+    """Base model for the ``SetNode`` settings.
 
-    Every 'AssignNode' config should be derived from this class. Each assignment
-    of a value to a state variable is configured by an item of the 'assignments'
+    Every ``AssignNode`` config should be derived from this class. Each assignment
+    of a value to a state variable is configured by an item of the ``assignments``
     field dict, where string key is equal to the variable name and value is
     assigned value.
 
@@ -337,12 +339,13 @@ TAssignNodeConfig = TypeVar('TAssignNodeConfig', bound=AssignNodeConfig)
 class AssignNode(NodeBase):
     """Node that assigns values to the state variables.
 
-    'AssignNode' allows to parametrise all assignments of values to state variables,
-    so its enough to create new config by deriving from 'AssignNodeConfig' and
-    initialise node with it. Also 'EvaluationNode' can be configured by 'JSONDict'
+    ``AssignNode`` allows to parametrise all assignments of values to state variables,
+    so its enough to create new config by deriving from ``AssignNodeConfig`` and
+    initialise node with it. Also ``EvaluationNode`` can be configured by ``JSONDict``
     config. In this case no special config model should be created, but config should
-    match 'AssignNodeConfig' config model.
+    match ``AssignNodeConfig`` config model.
     """
+    asyncable: bool = True
     config_model = AssignNodeConfig
     config: TAssignNodeConfig
 
@@ -366,17 +369,18 @@ class AssignNode(NodeBase):
 
 
 class ResetNodeConfig(ConfigModelBase):
-    """Base model for the 'ResetNode' settings.
+    """Base model for the ``ResetNode`` settings.
 
     Attributes:
-        variables: None or list of str names of the variables to be reset.
-            If empty list or None, ALL variables will be rest.
+        variables: ``None`` or list of str names of the variables to be reset.
+            If empty list or ``None``, ALL variables will be rest.
     """
     variables: Optional[List[str]] = Field(default=None)
 
 
 class ResetNode(NodeBase):
     """Node that resets state valuables."""
+    asyncable: bool = True
     config_model = ResetNodeConfig
     config: ResetNodeConfig
 
@@ -387,7 +391,7 @@ class ResetNode(NodeBase):
         """Resets state variables according to the config settings.
 
         Deletes items with keys given in config from the state variables dict.
-        If variables names list in config is empty or None, ALL variables will
+        If variables names list in config is empty or ``None``, ALL variables will
         be deleted.
 
         Args:

@@ -1,35 +1,35 @@
 """Configuration management tools.
 
-While 'nodzz' have the instruments to implement, manage and configure any
+While ``nodzz`` have the instruments to implement, manage and configure any
 behavior tree via pure Python API, this is of course not the most convenient
-way to manage behavior trees based projects. 'nodzz' provides config based
+way to manage behavior trees based projects. ``nodzz`` provides config based
 behavior tree management tools which allow completely separate tree graph
 design and nodes configuring from each particular node Python implementation.
-Here are the core concepts of 'nodzz' configuration:
+Here are the core concepts of ``nodzz`` configuration:
 
 Component.
 
-Component is a 'nodzz' project atomic building block (like node
+Component is a ``nodzz`` project atomic building block (like node
 or some connector, for example).
 
-In the 'nodzz' configuration tools component is represented by unique name
+In the ``nodzz`` configuration tools component is represented by unique name
 which identifies it among all other components and its config. From here on,
 the ter "component name" and the term "config name" will mean the same.
 Component config is a JSON-serializable mapping data structure which can
-exist both in the form of 'JSONDict' (JSON-serializable dict) and in the
-form of 'pydantic' based 'ConfigModelBase' config which in turn can be
-one-to-one converted from or to the 'JSONDict' representation. Please refer
-'ConfigModelBase' class documentation for more info.
+exist both in the form of ``JSONDict`` (JSON-serializable dict) and in the
+form of ``pydantic`` based ``ConfigModelBase`` config which in turn can be
+one-to-one converted from or to the ``JSONDict`` representation. Please refer
+``ConfigModelBase`` class documentation for more info.
 
 Each component config must have one (and only one) of two fields initialised:
-'class_name' or 'component_name'.
-* 'class_name' is a full import path to the python class which implements
+``class_name`` or ``component_name``.
+* ``class_name`` is a full import path to the python class which implements
 the component and which is initialized with the config. Import path should
 should locate component class in current Python environment and has format
-like 'nodzz.nodes.controllers.SequenceNode'. If 'class_name' is initialised,
+like ``nodzz.nodes.controllers.SequenceNode``. If ``class_name`` is initialised,
 component config should provide all necessary parameters for the component
 correct work.
-* 'component_name' is a reference to the name of some other 'nodzz' component
+* ``component_name`` is a reference to the name of some other ``nodzz`` component
 (referenced component) in the configuration namespace. In this case referenced
 config will be merged to the initial config: all uninitialized fields in the
 initial component config will be automatically filled by corresponding values
@@ -61,11 +61,11 @@ from nodzz.utils import load_file
 class ConfigSet:
     """Component configs management entity.
 
-    'ConfigSet' is a container for component configs, loaded from external sources
+    ``ConfigSet`` is a container for component configs, loaded from external sources
     like files or databases. It provides instruments for configs access, management
-    and validation. 'ConfigSet' serves as a library of component configs. All configs
+    and validation. ``ConfigSet`` serves as a library of component configs. All configs
     required for any behavior initialisation tree should be contained in one instance
-    of 'ConfigSet'.
+    of ``ConfigSet``.
     """
     def __init__(self) -> None:
         self._meta_configs = {}
@@ -82,9 +82,9 @@ class ConfigSet:
             source: Config source ID, used for config source identification in case
                 of config management problems.
             update: Boolean flag controlling the behavior when config with already
-                existing name is being added. If value is True, existing config will
-                be replaced by the new one. If value is False, exception will be raised.
-                Default value is False.
+                existing name is being added. If value is ``True``, existing config will
+                be replaced by the new one. If value is ``False``, exception will be raised.
+                Default value is ``False``.
         """
         class_name = config.get('class_name')
         ref_name = config.get('component_name')
@@ -115,7 +115,7 @@ class ConfigSet:
 
         Returns:
             JSONDict component config if config with given name exists in
-            config set, else None.
+            config set, else ``None``.
         """
         meta_config = self._meta_configs.get(name)
         result = meta_config['config'] if meta_config else None
@@ -215,16 +215,16 @@ class _ConfigFileModel(BaseModel):
 
 
 def load_config_file(file_path: Path) -> ConfigSet:
-    """Loads component configs from single JSON/YAML file and initialises 'ConfigSet' entity.
+    """Loads component configs from single JSON/YAML file and initialises ``ConfigSet`` entity.
 
     File should contain dict as a root element where keys are config names and
     values are configs.
 
     Args:
-        file_path: 'pathlib' object with configuration file path.
+        file_path: ``pathlib`` object with configuration file path.
 
     Returns:
-        'ConfigSet' instance with resolved configs loaded from file.
+        ``ConfigSet`` instance with resolved configs loaded from file.
     """
     config_dict = load_file(file_path)
     _ConfigFileModel.parse_obj(config_dict)
