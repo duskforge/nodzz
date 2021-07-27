@@ -1,3 +1,9 @@
+## v0.2.0 (2021-07-28)
+* **Fixed** snippets formatting in docstrings.
+* **Added** classifiers to the `setup.cfg` `metadata` section.
+* **Added** shields to readme.
+* **Added** asynchronous API.
+
 ## v0.1.1 (2021-07-19)
 * **Fixed** package discovery in `setup.cfg`.
 * **Fixed** naming typos in docs.

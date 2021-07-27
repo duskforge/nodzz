@@ -1,3 +1,7 @@
+[![PyPI](https://img.shields.io/pypi/v/nodzz)](https://pypi.python.org/pypi/nodzz)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nodzz)](https://www.python.org)
+[![GitHub](https://img.shields.io/github/license/duskforge/nodzz)](https://github.com/duskforge/nodzz/blob/main/LICENSE)
+
 # Nodzz: pure Python behavior trees framework
 
 Nodzz is a Python open-source library which provides a framework for behavior trees creation and management. You can use
@@ -9,15 +13,14 @@ it to implement behavior of your Arduino based robot, chat-bot or whatever else 
   for creating your own;
 * Behavior trees can be assembled and configured from components by using Python API or
   [pydantic](https://pydantic-docs.helpmanual.io/) and JSON friendly configs;
-* For now Nodzz is designed for building only synchronous applications, async API will be added soon.
+* Supports both synchronous and asynchronous development.
   
 ## Future plans
 
 * Documentation and tutorials will be available soon. For now, you can refer docstrings: [state and components](nodzz/core.py),
   [nodes base classes](nodzz/nodes/base.py), [controller nodes implementations](nodzz/nodes/controllers.py),
-  [task nodes implementations](nodzz/nodes/tasks.py), [configuration](nodzz/config.py) and
-  [tree management](nodzz/tree.py).
-* Async API will be available soon.
+  [task nodes implementations](nodzz/nodes/tasks.py), [configuration](nodzz/config.py), [tree management](nodzz/tree.py)
+  and [asynchronous development](nodzz/async_nodes/base.py).
 * Graphic behavior trees design tool is planned to be implemented.
 * The current set of implemented nodes (both controllers and tasks) is not final, more nodes implementations will be constantly
   added.

@@ -46,7 +46,7 @@ def load_file(file_path: Path) -> JSONType:
     Method wraps JSON and YAML files load.
 
     Args:
-        file_path: 'pathlib' object with configuration file path.
+        file_path: ``pathlib`` object with configuration file path.
 
     Returns:
         Object with loaded file contents.
