@@ -15,30 +15,30 @@ from nodzz.basic_types import JSONType, JSONDict, NodeStatus
 class ConfigModelBase(BaseSettings):
     """Base model for component configs.
 
-    Any 'nodzz' component config can be JSON serializable dict ('JSONDict') or
-    'pydantic' BaseSettings model. If second, config model should be derived
-    from this class. Fields defined on the 'nodzz' library level should not be
+    Any ``nodzz`` component config can be JSON serializable dict (``JSONDict``) or
+    ``pydantic`` BaseSettings model. If second, config model should be derived
+    from this class. Fields defined on the ``nodzz`` library level should not be
     overridden or used for the logic they were not designed for.
 
-    'JSONDict' representation allows to manage 'nodzz' configuration via JSON
+    ``JSONDict`` representation allows to manage ``nodzz`` configuration via JSON
     and YAML files, database or even graphic tools.
 
-    'ConfigModelBase' based component config models offer such features as default
+    ``ConfigModelBase`` based component config models offer such features as default
     values definition, better autodocumentation and autocompletion in IDE as
-    well as 'pydantic' features like validation and autofilling parameters
+    well as ``pydantic`` features like validation and autofilling parameters
     values from environment variables. Component config model can be defined
-    by assigning config model class as a value to the 'config_model' component
+    by assigning config model class as a value to the ``config_model`` component
     class-level variable. We are strongly encouraging you to define config model
-    for each component you create in your 'nodzz' powered projects.
+    for each component you create in your ``nodzz`` powered projects.
 
     Attributes:
         name: Str with component name.
         class_name: Str with full import path to the python class which implements
-            component. Field is used only when parsing 'JSONDict' config. Mutually
-            exclusive with 'component_name' attribute.
-        component_name: is a reference to the name of some other 'nodzz' component
-            in the configuration namespace. Field is used only when parsing 'JSONDict'
-            config.  Mutually exclusive with 'class_name' attribute.
+            component. Field is used only when parsing ``JSONDict`` config. Mutually
+            exclusive with ``component_name`` attribute.
+        component_name: is a reference to the name of some other ``nodzz`` component
+            in the configuration namespace. Field is used only when parsing ``JSONDict``
+            config.  Mutually exclusive with ``class_name`` attribute.
     """
     name: Optional[str] = None
     class_name: Optional[str] = None
@@ -50,20 +50,20 @@ TConfig = Union[JSONDict, TConfigModel]
 
 
 class ComponentBase:
-    """Base class for any 'nodzz' project component.
+    """Base class for any ``nodzz`` project component.
 
-    Component is a 'nodzz' project atomic building block (like node or some connector,
-    for example). Any 'nodzz' component should derive from this class. If component is
-    configurable, its config can be defined through the class derived from 'ConfigModelBase'
-    (which is 'pydantic' config models in fact or JSON serializable dict ('JSONDict')
+    Component is a ``nodzz`` project atomic building block (like node or some connector,
+    for example). Any ``nodzz`` component should derive from this class. If component is
+    configurable, its config can be defined through the class derived from ``ConfigModelBase``
+    (which is ``pydantic`` config models in fact or JSON serializable dict (``JSONDict``)
     config can be used.
 
     Attributes:
-        config_model: Component config class derived from 'ConfigModelBase'.
+        config_model: Component config class derived from ``ConfigModelBase``.
             Can be used for default values storage. If config model is defined
-            it will be initialised  from 'JSONDict' configs if such is provided
+            it will be initialised  from ``JSONDict`` configs if such is provided
             instead of config model instance.
-        config: 'pydantic' based or 'JSONDict' component config.
+        config: ``pydantic`` based or ``JSONDict`` component config.
     """
     config_model: Optional[TConfigModel] = None
     config: Optional[TConfig]
@@ -75,7 +75,7 @@ class ComponentBase:
         Validates config model type and initialised component config:
 
         Args:
-            config: 'pydantic' based or 'JSONDict' component config.
+            config: ``pydantic`` based or ``JSONDict`` component config.
         """
         if not self.config_model:
             self.config = config
@@ -107,11 +107,11 @@ class State:
     external environment and results of these inputs processing.
 
     State variables are stored in the Dict which can be accessed through the
-    'vars' property. Keys are variables names and values are variables values.
-    There is an important project-wide convention: 'None' state variable value
+    ``vars`` property. Keys are variables names and values are variables values.
+    There is an important project-wide convention: ``None`` state variable value
     always represents uninitialised variable.
 
-    Also JSON is used as a default serialisation format in 'nodzz', so all
+    Also JSON is used as a default serialisation format in ``nodzz``, so all
     variable values are presumed to be JSON serializable. No actual type
     checking is implemented, though some default methods like conversion
     to/from dict are implemented in JSON friendly way. You can derive
@@ -121,11 +121,11 @@ class State:
     def __init__(self, uid: Optional[str] = None,
                  variables: Optional[Dict[str, JSONType]] = None,
                  nodes: Optional[Dict[str, NodeStatus]] = None) -> None:
-        """Initializes state instance.
+        """Initialises state instance.
 
         State constructor is presumed to be used for blank state instance
-        creation, so mostly you will not have to specify 'variables' and
-        'nodes' arguments. 'from_dict' class method can be referred for
+        creation, so mostly you will not have to specify ``variables`` and
+        ``nodes`` arguments. ``from_dict`` class method can be referred for
         these arguments usage.
 
         Args:
@@ -154,7 +154,7 @@ class State:
             nodes: A boolean flag which includes nodes statuses into results.
                 Since each node status is converted to the serialization friendly
                 format, it can be some kind of expensive operation, so the default
-                value of the flag is False.
+                value of the flag is ``False``.
 
         Returns: Dict representation of the state.
         """
@@ -172,7 +172,7 @@ class State:
 
     @classmethod
     def from_dict(cls, state_dict: JSONDict) -> 'State':
-        """Initializes state from its dict representation.
+        """Initialises state from its dict representation.
 
         Args:
             state_dict: Dict representation of state.

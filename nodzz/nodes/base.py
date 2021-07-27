@@ -24,7 +24,19 @@ class NodeBase(ComponentBase):
 
     All nodes implementations or other nodes abstractions (except controller
     nodes) should derive from this class.
+
+    Attributes:
+        asyncable: Bool `asyncio` compatibility flag. If ``True`` and node ``execute``
+            method is not defined as ``async``, it will be automatically wrapped to
+            the coroutine during asynchronous behavior tree initialisation. Otherwise
+            exception will be risen if synchronous node will tried to be used in
+            asynchronous tree. Such behavior is implemented to allow synchronous nodes
+            be reused in asynchronous trees. Please be cautious with this flag and set
+            it to ``True`` only when implementing nodes with non CPU-bound ``execute``
+            method.
     """
+    asyncable: bool = False
+
     def __init__(self, config: Optional[TConfig] = None) -> None:
         """See the base class."""
         super().__init__(config=config)
@@ -57,13 +69,13 @@ class NodeBase(ComponentBase):
         raise NotImplementedError
 
     def prepare(self, node_id: str) -> None:
-        """Method is implemented in 'NodeWrapper' and 'ControllerNodeBase' classes
+        """Method is implemented in ``NodeWrapper`` and ``ControllerNodeBase`` classes
         and resides here for API compatibility.
         """
         pass
 
     def reset(self, state: State) -> None:
-        """Method is implemented in 'NodeWrapper' and 'ControllerNodeBase' classes
+        """Method is implemented in ``NodeWrapper`` and ``ControllerNodeBase`` classes
         and resides here for API compatibility.
         """
         pass
@@ -72,7 +84,7 @@ class NodeBase(ComponentBase):
 TNode = TypeVar('TNode', bound=NodeBase)
 
 
-class NodeWrapper(NodeBase):
+class NodeWrapperBase(NodeBase):
     """Node wrapping container.
 
     Each initialised node is wrapped to this container before it is allocated
@@ -87,10 +99,10 @@ class NodeWrapper(NodeBase):
     the same functional instance but handles execution statuses according
     its position in the tree.
 
-    NodeWrapper mirrors standard Node api.
+    NodeWrapper mirrors standard Node API.
     """
     def __init__(self, node: TNode) -> None:
-        """Initialise node wrapper.
+        """Initialises node wrapper.
 
         Args:
             node: Initialised node instance to be wrapped.
@@ -98,37 +110,31 @@ class NodeWrapper(NodeBase):
         super().__init__(config=node.config)
         self.id: Optional[str] = None
         self._node = node
+        self._tree_debug = _tree_debug
 
-        if _tree_debug:
-            self.execute = self.execute_debug
-        else:
-            self.execute = node.execute
+    def execute(self, state: State) -> NodeStatus:
+        """Calls wrapped node ``execute`` method."""
+        raise NotImplementedError
 
     # TODO: Refactor, use logging.
-    def execute_debug(self, state: State) -> NodeStatus:
-        """Executes node and logs execution status.
-
-        Tree debug mode wrapper for the node 'execute' method.
+    def _log_debug(self, status: NodeStatus, state: State) -> None:
+        """Logs node execution status and behavior tree state after node execution.
 
         Args:
+            status: Node execution status.
             state: Behavior tree execution state.
-
-        Returns:
-            One of three node execution statuses: SUCCESS, FAILED, RUNNING.
         """
-        status = self._node.execute(state=state)
         state_str = str(state.to_dict())
         config_dict = dict(self.config)
         name = config_dict.get('name')
         debug_str = f'[nodzz debug] id: {self.id}, name: {name}, status: {str(status)}, state: {state_str}'
         print(debug_str)
-        return status
 
     def prepare(self, node_id: str) -> None:
         """Sets node id.
 
-        Also calls wrapped node 'prepare' method. If this is controller node,
-        all child nodes 'prepare' methods will be subsequently called.
+        Also calls wrapped node ``prepare`` method. If this is controller node,
+        all child nodes ``prepare`` methods will be subsequently called.
 
         Args:
             node_id: String node id.
@@ -139,7 +145,7 @@ class NodeWrapper(NodeBase):
     def reset(self, state: State) -> None:
         """Resets node status.
 
-        Sets node status to READY. Also calls wrapped node 'reset' method.
+        Sets node status to READY. Also calls wrapped node ``reset`` method.
         If this is controller node, all child nodes statuses will be
         subsequently reset.
 
@@ -148,6 +154,45 @@ class NodeWrapper(NodeBase):
         """
         state.reset_node_status(node_id=self.id)
         self._node.reset(state)
+
+
+class NodeWrapper(NodeWrapperBase):
+    """Synchronous node wrapper implementation.
+
+    For more reference see the base class.
+    """
+    def __init__(self, node: TNode) -> None:
+        """Initialises node wrapper.
+
+        Mirrors wrapped node ``execute`` method or wraps it up in the debug
+        executor.
+
+        Args:
+            node: Initialised node instance to be wrapped.
+        """
+        super().__init__(node=node)
+
+        if self._tree_debug:
+            self.execute = self._execute_debug
+
+    def execute(self, state: State) -> NodeStatus:
+        """Calls wrapped node ``execute`` method."""
+        return self._node.execute(state=state)
+
+    def _execute_debug(self, state: State) -> NodeStatus:
+        """Executes node and calls logging of its execution status.
+
+        Tree debug mode wrapper for the node ``execute`` method.
+
+        Args:
+            state: Behavior tree execution state.
+
+        Returns:
+            One of three node execution statuses: SUCCESS, FAILED, RUNNING.
+        """
+        status = self._node.execute(state=state)
+        self._log_debug(status=status, state=state)
+        return status
 
 
 class ControllerConfig(ConfigModelBase):
@@ -196,7 +241,7 @@ class ControllerNodeBase(NodeBase):
 
     # TODO: Think of unifying __init__ signature among all components.
     def __init__(self, *children: TNode, config: Optional[TControllerConfig] = None) -> None:
-        """Initialise controller node.
+        """Initialises controller node.
 
         Args:
             *children: Initialised child nodes.
