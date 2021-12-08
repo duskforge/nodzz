@@ -69,7 +69,7 @@ def import_by_name(name: str) -> Any:
     Returns:
         Imported object.
     """
-    module_name = name.rsplit('.', 1)
-    object_name = module_name.pop(-1)
-    module_name = module_name[0] if module_name else '__init__'
+    names = name.rsplit('.', 1)
+    object_name = names.pop(-1)
+    module_name = names[0] if names else '__main__'
     return getattr(import_module(module_name), object_name)

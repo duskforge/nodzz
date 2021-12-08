@@ -10,8 +10,6 @@ from pydantic import BaseSettings
 from nodzz.basic_types import JSONType, JSONDict, NodeStatus
 
 
-# TODO: Implement module/name fields based configuration.
-# TODO: Implement caption field.
 class ConfigModelBase(BaseSettings):
     """Base model for component configs.
 
@@ -32,7 +30,8 @@ class ConfigModelBase(BaseSettings):
     for each component you create in your ``nodzz`` powered projects.
 
     Attributes:
-        name: Str with component name.
+        name: Str with component name which is used for component identification in the component namespace.
+        info: Str with arbitrary human readable component information, such as caption or description.
         class_name: Str with full import path to the python class which implements
             component. Field is used only when parsing ``JSONDict`` config. Mutually
             exclusive with ``component_name`` attribute.
@@ -41,6 +40,7 @@ class ConfigModelBase(BaseSettings):
             config.  Mutually exclusive with ``class_name`` attribute.
     """
     name: Optional[str] = None
+    info: Optional[str] = None
     class_name: Optional[str] = None
     component_name: Optional[str] = None
 

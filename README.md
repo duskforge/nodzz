@@ -24,6 +24,7 @@ it to implement behavior of your Arduino based robot, chat-bot or whatever else 
 * Graphic behavior trees design tool is planned to be implemented.
 * The current set of implemented nodes (both controllers and tasks) is not final, more nodes implementations will be constantly
   added.
+* Distributed tree construction tools (running branches as microservices) are planned to be implemented.
   
 
 ## Tutorial
@@ -56,7 +57,7 @@ defending the Imperium of Man from its numerous enemies. We will try to model hi
 Our brave guardsman behavior depends on number of enemies he encounters:
 * No (zero) enemies: he will continue watching;
 * One enemy: he will ruthlessly fight it;
-* Many (more than one) enemies: hi will bravely run away (into the warm embraces of Commissar).
+* Many (more than one) enemies: he will bravely run away (into the warm embraces of Commissar).
 
 Once we described guardsman behavior model, we can start implementing it in behavior tree.
 

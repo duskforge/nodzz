@@ -328,7 +328,7 @@ class AssignNodeConfig(ConfigModelBase):
     assigned value.
 
     Attributes:
-        assignments: Dict with variable naes and assigned values.
+        assignments: Dict with variable names and assigned values.
     """
     assignments: Dict[str, JSONType]
 

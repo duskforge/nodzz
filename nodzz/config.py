@@ -14,7 +14,7 @@ or some connector, for example).
 
 In the ``nodzz`` configuration tools component is represented by unique name
 which identifies it among all other components and its config. From here on,
-the ter "component name" and the term "config name" will mean the same.
+the term "component name" and the term "config name" will mean the same.
 Component config is a JSON-serializable mapping data structure which can
 exist both in the form of ``JSONDict`` (JSON-serializable dict) and in the
 form of ``pydantic`` based ``ConfigModelBase`` config which in turn can be
@@ -70,14 +70,13 @@ class ConfigSet:
     def __init__(self) -> None:
         self._meta_configs = {}
 
-    def add_config(self, name: str, config: JSONDict, source: str = 'undefined', update: bool = False) -> None:
+    def add_config(self, config: JSONDict, source: str = 'undefined', update: bool = False) -> None:
         """Adds component config to the config set.
 
         Adds component config and its metadata to the config set, validates and
         optionally resolves config.
 
         Args:
-            name: Config name.
             config: Component config in JSON-serializable dict format.
             source: Config source ID, used for config source identification in case
                 of config management problems.
@@ -86,6 +85,15 @@ class ConfigSet:
                 be replaced by the new one. If value is ``False``, exception will be raised.
                 Default value is ``False``.
         """
+        name = config.get('name')
+
+        if not name:
+            raise ValueError(f'Uninitialised config name (source: {source})')
+        elif name in self._meta_configs and not update:
+            raise ValueError(f'Trying to add config with already existing name: {name}, '
+                             f'new config source: {source}, '
+                             f'existing config source: {self._meta_configs[name]["source"]}')
+
         class_name = config.get('class_name')
         ref_name = config.get('component_name')
 
@@ -93,14 +101,6 @@ class ConfigSet:
             raise ValueError(f'Both class_name and component_name are defined in config: {name}(source: {source})')
         elif not class_name and not ref_name:
             raise ValueError(f'Both class_name and component_name are not defined in config: {name} (source: {source})')
-
-        if name in self._meta_configs and not update:
-            raise ValueError(f'Trying to add config with already existing name: {name}, '
-                             f'new config source: {source}, '
-                             f'existing config source: {self._meta_configs[name]["source"]}')
-
-        # TODO: Now is assigning used only for debug mode. Remove when name/module configuration will be implemented.
-        config['name'] = name
 
         self._meta_configs[name] = {
             'config': config,
@@ -211,28 +211,64 @@ class ConfigSet:
 
 class _ConfigFileModel(BaseModel):
     """Config file validation model."""
-    __root__: Dict[str, Dict[str, Any]]
+    __root__: List[Dict[str, Any]]
 
 
-def load_config_file(file_path: Path) -> ConfigSet:
+def _parse_recursive(config_set: ConfigSet, path: Path, name_prefix: Optional[str] = None) -> None:
+    """Loads component configs from single JSON/YAML file to the ``ConfigSet`` entity.
+
+    File should contain list as a root element which values are components configs.
+
+    Args:
+        config_set: Initialised instance of ``ConfigSet``.
+        path: ``pathlib`` object with configuration file path.
+        name_prefix: Optional string prefix which is added to the component name.
+    """
+    if path.is_dir():
+        prefix = f'{name_prefix}{path.name}.' if name_prefix else f'{path.name}.'
+
+        for subpath in path.iterdir():
+            _parse_recursive(config_set, subpath, prefix)
+    elif path.is_file():
+        configs_list: List[Dict[str, Any]] = load_file(path)
+        _ConfigFileModel.parse_obj(configs_list)
+        file_path_str = str(path)
+        prefix = f'{name_prefix}{path.stem}.' if name_prefix else f'{path.stem}.'
+
+        for config in configs_list:
+            config['name'] = f'{prefix}{config["name"]}'
+            config_set.add_config(config=config, source=file_path_str)
+
+    # config_set.resolve_configs()
+
+
+def parse_configs(configs_path: Path, config_set: Optional[ConfigSet] = None) -> ConfigSet:
+    config_set = config_set or ConfigSet()
+
+    if configs_path.is_dir():
+        for path in configs_path.iterdir()
+
+
+def load_config_file(file_path: Path, config_set: Optional[ConfigSet] = None) -> ConfigSet:
     """Loads component configs from single JSON/YAML file and initialises ``ConfigSet`` entity.
 
-    File should contain dict as a root element where keys are config names and
-    values are configs.
+    File should contain list as a root element which values are components configs.
 
     Args:
         file_path: ``pathlib`` object with configuration file path.
+        config_set: Initialised instance of ``ConfigSet`` or ``None``.
+            If ``None``, new ``ConfigSet`` instance is initialised.
 
     Returns:
         ``ConfigSet`` instance with resolved configs loaded from file.
     """
-    config_dict = load_file(file_path)
-    _ConfigFileModel.parse_obj(config_dict)
-    config_set = ConfigSet()
+    configs_list = load_file(file_path)
+    _ConfigFileModel.parse_obj(configs_list)
+    config_set = config_set or ConfigSet()
     file_path_str = str(file_path)
 
-    for name, config in config_dict.items():
-        config_set.add_config(name=name, config=config, source=file_path_str)
+    for config in configs_list:
+        config_set.add_config(config=config, source=file_path_str)
 
     config_set.resolve_configs()
 
