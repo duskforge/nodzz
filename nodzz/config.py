@@ -58,6 +58,11 @@ from nodzz.basic_types import JSONDict
 from nodzz.utils import load_file
 
 
+class _ConfigFileModel(BaseModel):
+    """Config file validation model."""
+    __root__: List[Dict[str, Any]]
+
+
 class ConfigSet:
     """Component configs management entity.
 
@@ -209,67 +214,46 @@ class ConfigSet:
                 self._meta_configs[config_name]['config'] = resolved_config
 
 
-class _ConfigFileModel(BaseModel):
-    """Config file validation model."""
-    __root__: List[Dict[str, Any]]
-
-
-def _parse_recursive(config_set: ConfigSet, path: Path, name_prefix: Optional[str] = None) -> None:
-    """Loads component configs from single JSON/YAML file to the ``ConfigSet`` entity.
-
-    File should contain list as a root element which values are components configs.
-
-    Args:
-        config_set: Initialised instance of ``ConfigSet``.
-        path: ``pathlib`` object with configuration file path.
-        name_prefix: Optional string prefix which is added to the component name.
-    """
-    if path.is_dir():
-        prefix = f'{name_prefix}{path.name}.' if name_prefix else f'{path.name}.'
-
-        for subpath in path.iterdir():
-            _parse_recursive(config_set, subpath, prefix)
-    elif path.is_file():
+def _load_recursive(path: Path, config_set: ConfigSet, root_prefix: str, prefix: str) -> None:
+    if path.is_file():
         configs_list: List[Dict[str, Any]] = load_file(path)
         _ConfigFileModel.parse_obj(configs_list)
         file_path_str = str(path)
-        prefix = f'{name_prefix}{path.stem}.' if name_prefix else f'{path.stem}.'
 
         for config in configs_list:
-            config['name'] = f'{prefix}{config["name"]}'
+            name = config['name']
+            config['name'] = f'{prefix}{config[name]}'
+            component_name = config.get('component_name')
+
+            if component_name:
+                config['component_name'] = f'{root_prefix}{component_name}'
+
             config_set.add_config(config=config, source=file_path_str)
-
-    # config_set.resolve_configs()
-
-
-def parse_configs(configs_path: Path, config_set: Optional[ConfigSet] = None) -> ConfigSet:
-    config_set = config_set or ConfigSet()
-
-    if configs_path.is_dir():
-        for path in configs_path.iterdir()
+    elif path.is_dir():
+        for inner_path in path.iterdir():
+            prefix = f'{prefix}{inner_path.stem}.'
+            _load_recursive(inner_path, config_set, root_prefix, prefix)
 
 
-def load_config_file(file_path: Path, config_set: Optional[ConfigSet] = None) -> ConfigSet:
+def update_from_files(path: Path, config_set: ConfigSet, is_package: bool = True) -> None:
     """Loads component configs from single JSON/YAML file and initialises ``ConfigSet`` entity.
 
     File should contain list as a root element which values are components configs.
 
     Args:
-        file_path: ``pathlib`` object with configuration file path.
+        path: ``pathlib`` object with configuration file path.
         config_set: Initialised instance of ``ConfigSet`` or ``None``.
             If ``None``, new ``ConfigSet`` instance is initialised.
 
     Returns:
         ``ConfigSet`` instance with resolved configs loaded from file.
     """
-    configs_list = load_file(file_path)
-    _ConfigFileModel.parse_obj(configs_list)
-    config_set = config_set or ConfigSet()
-    file_path_str = str(file_path)
+    root_prefix = f'{path.stem}.' if is_package else ''
+    _load_recursive(path, config_set, root_prefix, root_prefix)
 
-    for config in configs_list:
-        config_set.add_config(config=config, source=file_path_str)
 
+def init_from_files(path: Path) -> ConfigSet:
+    config_set = ConfigSet()
+    update_from_files(path, config_set, is_module=False)
     config_set.resolve_configs()
-
     return config_set
